@@ -1,9 +1,16 @@
 // Base URL is read from VITE_API_URL env var (set in .env.local).
-// matchupApi.js
-const RAW_URL = import.meta.env.VITE_API_URL || "https://matchup-ofs4.onrender.com";
+// meetupApi.js
 
-// Osiguravamo da URL uvek ima ispravan "https://" protokol
-const BASE = RAW_URL.startsWith("http") ? RAW_URL : `https://${RAW_URL}`;
+// 1. Ako varijabla nije definisana na Vercelu, uzimamo Render URL kao siguran fallback
+const ENV_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = (ENV_URL && ENV_URL.trim() !== "") 
+  ? ENV_URL 
+  : "https://matchup-ofs4.onrender.com";
+
+// Osiguravamo da URL uvek ima protokol na početku i nema kosu crtu na kraju
+const CLEAN_BASE = BASE_URL.startsWith("http") 
+  ? BASE_URL.replace(/\/+$/, "") 
+  : `https://${BASE_URL.replace(/\/+$/, "")}`;
 
 export const request = async (method, endpoint, body = null) => {
   const options = {
@@ -17,11 +24,11 @@ export const request = async (method, endpoint, body = null) => {
     options.body = JSON.stringify(body);
   }
 
-  // Koristimo URL objekat da izbegnemo dupliranje kosa crte (//)
+  // Običan string concatenation koji garantovano ne puca:
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  const url = new URL(`/api${cleanEndpoint}`, BASE).toString();
+  const fullUrl = `${CLEAN_BASE}/api${cleanEndpoint}`;
 
-  const response = await fetch(url, options);
+  const response = await fetch(fullUrl, options);
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || "Greška na serveru");
