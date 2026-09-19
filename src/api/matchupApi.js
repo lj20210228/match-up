@@ -1,42 +1,26 @@
-// Base URL is read from VITE_API_URL env var (set in .env.local).
-// meetupApi.js
-
-// 1. Ako varijabla nije definisana na Vercelu, uzimamo Render URL kao siguran fallback
-const ENV_URL = import.meta.env.VITE_API_URL;
-const BASE_URL = (ENV_URL && ENV_URL.trim() !== "") 
-  ? ENV_URL 
-  : "https://matchup-ofs4.onrender.com";
-
-// Osiguravamo da URL uvek ima protokol na početku i nema kosu crtu na kraju
-const CLEAN_BASE = BASE_URL.startsWith("http") 
-  ? BASE_URL.replace(/\/+$/, "") 
-  : `https://${BASE_URL.replace(/\/+$/, "")}`;
+const BASE = import.meta.env.VITE_API_URL
 
 export const request = async (method, endpoint, body = null) => {
   const options = {
     method,
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
-  };
+  }
 
   if (body) {
-    options.body = JSON.stringify(body);
+    options.body = JSON.stringify(body)
   }
 
-  // Običan string concatenation koji garantovano ne puca:
-  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  const fullUrl = `${CLEAN_BASE}/api${cleanEndpoint}`;
+  const response = await fetch(`${BASE}/api${endpoint}`, options)
 
-  const response = await fetch(fullUrl, options);
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || "Greška na serveru");
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.message || 'Greška na serveru')
   }
-  return response.json();
-};
-// ── AUTH ────────────────────────────────────────────────────────────────────
 
+  return response.json()
+}
 /** Register a new user. */
 export const register = (data) => request("POST", "/auth/register", data);
 
