@@ -13,8 +13,7 @@ export const request = async (method, endpoint, body = null) => {
     options.body = JSON.stringify(body);
   }
 
-  const response = await fetch(`http://localhost:8080/api${endpoint}`, options);
-  if (!response.ok) {
+const response = await fetch(`${BASE}/api${endpoint}`, options);  if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || "Greška na serveru");
   }
