@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getMatches } from "../api/matchupApi";
+import { listMatches } from "../api/matchupApi";
 
 const sports = ["Svi", "Football", "Basketball", "Tennis", "Padel", "Running"];
 const sportEmojis = {
