@@ -1,11 +1,15 @@
 // Base URL is read from VITE_API_URL env var (set in .env.local).
-const BASE = import.meta.env.VITE_API_URL ?? "https://matchup-ofs4.onrender.com";
-// meetupApi.js
+// matchupApi.js
+const RAW_URL = import.meta.env.VITE_API_URL || "https://matchup-ofs4.onrender.com";
+
+// Osiguravamo da URL uvek ima ispravan "https://" protokol
+const BASE = RAW_URL.startsWith("http") ? RAW_URL : `https://${RAW_URL}`;
+
 export const request = async (method, endpoint, body = null) => {
   const options = {
     method,
     headers: {
-      "Content-Type": "application/json", // OBAVEZNO
+      "Content-Type": "application/json",
     },
   };
 
@@ -13,7 +17,12 @@ export const request = async (method, endpoint, body = null) => {
     options.body = JSON.stringify(body);
   }
 
-const response = await fetch(`${BASE}/api${endpoint}`, options);  if (!response.ok) {
+  // Koristimo URL objekat da izbegnemo dupliranje kosa crte (//)
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const url = new URL(`/api${cleanEndpoint}`, BASE).toString();
+
+  const response = await fetch(url, options);
+  if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || "Greška na serveru");
   }
