@@ -1,23 +1,27 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Opšte PWA oznake -->
-<meta name="theme-color" content="#0F0F11" />
-<link rel="icon" href="/favicon.ico" />
-
-<!-- iOS Safari specifična podešavanja -->
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Matchup" />
-<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-
-<!-- Sprečavanje zuma pri kliku na input polja na telefonima -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <meta charset="UTF-8" />
+    <title>Matchup</title>
+
+    <!-- Sprečavanje zuma i optimizacija za ekrane mobilnih telefona -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+
+    <!-- PWA Manifest veza (OBAVEZNO) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0F0F11" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- iOS Safari specifična podešavanja -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Matchup" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Favicon i eksterni stilovi -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>match-up</title>
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   </head>
   <body>
     <div id="root"></div>
