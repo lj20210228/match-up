@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs.plugin-react';
+import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
@@ -9,12 +9,13 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'Matchup - Pronađi meč',
+        name: 'Matchup',
         short_name: 'Matchup',
-        description: 'Aplikacija za spajanje igrača i organizaciju sportskih mečeva',
+        description: 'Matchup - Pronađi meč i sportske partnere',
         theme_color: '#0F0F11',
         background_color: '#0F0F11',
         display: 'standalone',
+        orientation: 'portrait',
         icons: [
           {
             src: 'pwa-192x192.png',
@@ -24,7 +25,8 @@ export default defineConfig({
           {
             src: 'pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       }
