@@ -3,12 +3,6 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  css: {
-    transformer: 'postcss', // Prilagođava obradu PostCSS-u
-  },
-  build: {
-    cssMinify: 'esbuild', // Koristi esbuild umesto lightningcss
-  },
   plugins: [
     react(),
     VitePWA({
