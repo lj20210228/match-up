@@ -23,7 +23,7 @@ export default function MapScreen({ onMatchPress }) {
 
     const sportParam = activeSport === "Svi" ? null : activeSport;
 
-    getMatches(sportParam)
+    listMatches(sportParam)
       .then((data) => {
         if (isMounted && Array.isArray(data)) {
           // Filtriramo samo mečeve koji imaju slobodna mesta i validne koordinate
