@@ -1,57 +1,59 @@
 const BASE = import.meta.env.VITE_API_URL
+// Bez Markdown linka — mora biti običan string.
+//const BASE = "http://localhost:8080";
 
 export const request = async (method, endpoint, body = null) => {
+  const token = localStorage.getItem("matchup_token");
+
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  // Login i register nemaju token; za ostale zahteve se šalje automatski.
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const options = {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  }
+    headers,
+  };
 
   if (body) {
-    options.body = JSON.stringify(body)
+    options.body = JSON.stringify(body);
   }
 
-  const response = await fetch(`${BASE}/api${endpoint}`, options)
+  const response = await fetch(`${BASE}/api${endpoint}`, options);
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.message || 'Greška na serveru')
+    const errorData = await response.json().catch(() => ({}));
+
+    throw new Error(
+      errorData.error ||
+      errorData.message ||
+      "Greška na serveru"
+    );
   }
 
-  return response.json()
-}
-/** Register a new user. */
-export const register = (data) => request("POST", "/auth/register", data);
+  // Ako neka ruta vraća prazan odgovor, neće baciti grešku.
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
+};
 
-/** Log in and receive tokens. */
-export const login = (data) => request("POST", "/auth/login", data);
+export const register = (data) =>
+  request("POST", "/auth/register", data);
 
-/** Refresh an expired access token. */
-export const refreshToken = (refresh_token) =>
-  request("POST", "/auth/refresh", { refresh_token });
+export const login = (data) =>
+  request("POST", "/auth/login", data);
 
-/** Log out (invalidates the refresh token server-side). */
-export const logout = () => request("POST", "/auth/logout");
+export const getMe = () =>
+  request("GET", "/users/me");
 
-// ── PROFILE ─────────────────────────────────────────────────────────────────
+export const updateMe = (data) =>
+  request("PATCH", "/users/me", data);
 
-/** Get the current user's profile. */
-export const getMe = () => request("GET", "/users/me");
-
-/** Update profile fields. */
-export const updateMe = (data) => request("PATCH", "/users/me", data);
-
-/** Upload a profile avatar. Returns the new avatar_url. */
-export const uploadAvatar = async (file) => {
-  const form = new FormData();
-  form.append("avatar", file);
-  const res = await fetch(`${BASE}/users/me/avatar`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${localStorage.getItem("matchup_token") ?? ""}` },
-    body: form,
-  });
-  return res.json();
+export const logout = () => {
+  localStorage.removeItem("matchup_token");
 };
 
 // ── MATCHES ──────────────────────────────────────────────────────────────────
