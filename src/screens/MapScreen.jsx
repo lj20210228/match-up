@@ -116,8 +116,7 @@ export default function MapScreen({ onMatchPress }) {
       </div>
 
       {/* Gornji filteri */}
-      <div className="relative z-30 pt-14 pointer-events-none">
-        <div className="px-5 pb-3 bg-gradient-to-b from-[#0F0F11]/90 via-[#0F0F11]/60 to-transparent pointer-events-auto">
+<div className="relative z-30 pt-[calc(env(safe-area-inset-top)+0.75rem)] pointer-events-none">     <div className="px-5 pb-3 bg-gradient-to-b from-[#0F0F11]/90 via-[#0F0F11]/60 to-transparent pointer-events-auto">
           <div className="flex items-center justify-between mb-3">
             <div>
               <h1 className="text-xl font-extrabold text-[#F5F5F3] tracking-tight m-0">
