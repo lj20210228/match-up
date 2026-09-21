@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
-const API_BASE =   import.meta.env.VITE_API_URL ;
-
+const BASE =
+  import.meta.env.VITE_API_URL || "http://localhost:8080";
 export function useChatWebSocket(matchId) {
   const [messages, setMessages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
