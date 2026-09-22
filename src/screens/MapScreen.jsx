@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import L from "leaflet";
 import { listMatches } from "../api/matchupApi";
+import "leaflet/dist/leaflet.css";
 
 const sports = ["Svi", "Football", "Basketball", "Tennis", "Padel", "Running"];
 const sportEmojis = {
@@ -10,13 +13,70 @@ const sportEmojis = {
   Running: "🏃",
 };
 
+// Pomoćna komponenta za promenu centra mape iz React koda
+function ChangeView({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center);
+  }, [center, map]);
+  return null;
+}
+
+// Funkcija koja generiše dinamičku HTML ikonicu sa Leaflet DivIcon-om
+const createCustomIcon = (sportEmoji, venue, isSelected) => {
+  const shortVenue = venue ? venue.split(" ").slice(0, 2).join(" ") : "";
+  
+  const html = `
+    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+      <div style="
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        transition: all 0.2s ease;
+        background-color: ${isSelected ? "#D4FF00" : "#0F0F11"};
+        border: 2px solid ${isSelected ? "#D4FF00" : "rgba(212, 255, 0, 0.5)"};
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        border-bottom-left-radius: 8px;
+        box-shadow: ${isSelected ? "0 10px 15px -3px rgba(212, 255, 0, 0.4)" : "0 4px 6px -1px rgba(0, 0, 0, 0.5)"};
+      ">
+        <span style="font-size: 12px; line-height: 1;">${sportEmoji || "⚽"}</span>
+        ${
+          isSelected
+            ? `<span style="font-size: 11px; font-weight: 800; color: #0F0F11; white-space: nowrap;">${shortVenue}</span>`
+            : ""
+        }
+      </div>
+      <div style="
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid ${isSelected ? "#D4FF00" : "#0F0F11"};
+        margin-left: auto;
+        margin-right: 0;
+      "></div>
+    </div>
+  `;
+
+  return L.divIcon({
+    html: html,
+    className: "custom-match-marker", // Prazan class sprečava podrazumevane Leaflet stilove
+    iconSize: [isSelected ? 100 : 36, 36],
+    iconAnchor: [18, 36], // Sidro stavljamo na sam vrh strelice (dno pina)
+  });
+};
+
 export default function MapScreen({ onMatchPress }) {
   const [activeSport, setActiveSport] = useState("Svi");
   const [matches, setMatches] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Dohvatanje realnih mečeva sa API-ja
+  const centerLat = 44.806;
+  const centerLng = 20.465;
+
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
@@ -26,7 +86,6 @@ export default function MapScreen({ onMatchPress }) {
     listMatches(sportParam)
       .then((data) => {
         if (isMounted && Array.isArray(data)) {
-          // Filtriramo samo mečeve koji imaju slobodna mesta i validne koordinate
           const availableMatches = data.filter(
             (m) => m.joined < m.total && m.lat != null && m.lng != null
           );
@@ -45,78 +104,55 @@ export default function MapScreen({ onMatchPress }) {
     };
   }, [activeSport]);
 
-  const centerLat = 44.806;
-  const centerLng = 20.465;
-
   return (
     <div className="h-full flex flex-col overflow-hidden relative bg-[#0F0F11]">
-      {/* OpenStreetMap Prikaz */}
-      <div className="absolute inset-0">
-        <iframe
-          title="Matches map"
-          src={`https://www.openstreetmap.org/export/embed.html?bbox=${centerLng - 0.08},${centerLat - 0.05},${centerLng + 0.08},${centerLat + 0.05}&layer=mapnik`}
+      {/* Pravi Leaflet prikaz mape */}
+      <div className="absolute inset-0 z-0">
+        <MapContainer
+          center={[centerLat, centerLng]}
+          zoom={13}
+          zoomControl={false}
           className="w-full h-full border-0 invert hue-rotate-180 saturate-75 brightness-75"
-        />
-      </div>
+        >
+          <ChangeView center={[centerLat, centerLng]} />
+          
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
 
-      {/* Overlay sa pinovima */}
-      <div className="absolute inset-0 pointer-events-none">
-        {loading ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#0F0F11]/40 backdrop-blur-xs pointer-events-auto">
-            <span className="text-xs font-semibold text-[#D4FF00] bg-[#0F0F11]/80 px-4 py-2 rounded-full border border-white/10">
-              Učitavanje mečeva na mapi...
-            </span>
-          </div>
-        ) : (
-          matches.map((match) => {
-            const lngRange = 0.16;
-            const latRange = 0.10;
-            const x = ((match.lng - (centerLng - lngRange / 2)) / lngRange) * 100;
-            const y = (1 - (match.lat - (centerLat - latRange / 2)) / latRange) * 100;
+          {/* Renderovanje pinova direktno na Leaflet mapi */}
+          {matches.map((match) => {
             const isSelected = selectedMatch?.id === match.id;
-
             return (
-              <div
+              <Marker
                 key={match.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedMatch(isSelected ? null : match);
+                position={[match.lat, match.lng]}
+                icon={createCustomIcon(match.sportEmoji, match.venue, isSelected)}
+                eventHandlers={{
+                  click: (e) => {
+                    L.DomEvent.stopPropagation(e);
+                    setSelectedMatch(isSelected ? null : match);
+                  },
                 }}
-                style={{
-                  left: `${Math.max(5, Math.min(95, x))}%`,
-                  top: `${Math.max(5, Math.min(90, y))}%`,
-                }}
-                className={`absolute -translate-x-1/2 -translate-y-full pointer-events-auto cursor-pointer transition-transform ${
-                  isSelected ? "z-20 scale-110" : "z-10 scale-100"
-                }`}
-              >
-                <div
-                  className={`flex items-center gap-1 px-2.5 py-1 transition-all ${
-                    isSelected
-                      ? "bg-[#D4FF00] border-2 border-[#D4FF00] rounded-t-xl rounded-bl-xl shadow-lg shadow-[#D4FF00]/40"
-                      : "bg-[#0F0F11] border-2 border-[#D4FF00]/50 rounded-t-lg rounded-bl-lg shadow-md"
-                  }`}
-                >
-                  <span className="text-xs">{match.sportEmoji || "⚽"}</span>
-                  {isSelected && (
-                    <span className="text-[11px] font-extrabold text-[#0F0F11] whitespace-nowrap">
-                      {match.venue.split(" ").slice(0, 2).join(" ")}
-                    </span>
-                  )}
-                </div>
-                <div
-                  className={`w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] ml-auto mr-0 ${
-                    isSelected ? "border-t-[#D4FF00]" : "border-t-[#0F0F11]"
-                  }`}
-                />
-              </div>
+              />
             );
-          })
-        )}
+          })}
+        </MapContainer>
       </div>
+
+      {/* Indikator učitavanja */}
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#0F0F11]/40 backdrop-blur-xs z-20 pointer-events-none">
+          <span className="text-xs font-semibold text-[#D4FF00] bg-[#0F0F11]/80 px-4 py-2 rounded-full border border-white/10">
+            Učitavanje mečeva na mapi...
+          </span>
+        </div>
+      )}
 
       {/* Gornji filteri */}
-<div className="relative z-30 pt-[calc(env(safe-area-inset-top)+0.75rem)] pointer-events-none">     <div className="px-5 pb-3 bg-gradient-to-b from-[#0F0F11]/90 via-[#0F0F11]/60 to-transparent pointer-events-auto">
+      <div className="relative z-30 pt-[calc(env(safe-area-inset-top)+0.75rem)] pointer-events-none">
+        <div className="px-5 pb-3 bg-gradient-to-b from-[#0F0F11]/90 via-[#0F0F11]/60 to-transparent pointer-events-auto">
           <div className="flex items-center justify-between mb-3">
             <div>
               <h1 className="text-xl font-extrabold text-[#F5F5F3] tracking-tight m-0">
