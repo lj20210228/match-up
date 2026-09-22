@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useCallback } from "react";
 import FeedScreen from "./screens/FeedScreen";
 import AuthScreen from "./screens/AuthScreen";
 
@@ -8,15 +8,20 @@ import ChatListScreen from "./screens/ChatListScreen";
 import ChatScreen from "./screens/ChatScreen";
 import MapScreen from "./screens/MapScreen";
 import ProfileScreen from "./screens/ProfileScreen";
-import { CHATS } from "./data/chats";
 
 export default function App() {
   const [nav, setNav] = useState({ tab: "explore", screen: "main" });
-  
+  const [totalUnread, setTotalUnread] = useState(0);
+const [chatListVersion, setChatListVersion] = useState(0);
   // Provera postojanja tokena u localStorage pri pokretanju
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return !!localStorage.getItem("matchup_token");
   });
+
+
+
+
+
 
   const handleLogout = () => {
     localStorage.removeItem("matchup_token");
@@ -30,23 +35,24 @@ export default function App() {
   };
 
   const goToChat = (chatId) => {
-    const chat = CHATS.find((c) => c.id === chatId) ?? CHATS[0];
+    const chat = listChats.find((c) => c.id === chatId) ?? CHATS[0];
     setNav((prev) => ({ tab: "chat", screen: "chat", selectedChat: chat }));
   };
 
   const goBack = () => {
     setNav((prev) => ({ ...prev, screen: "main" }));
   };
+const switchTab = (tab) => {
+  if (tab === "chat") {
+    setChatListVersion((version) => version + 1);
+  }
 
-  const switchTab = (tab) => {
-    setNav({ tab, screen: "main" });
-  };
-
+  setNav({ tab, screen: "main" });
+};
   if (!isAuthenticated) {
     return <AuthScreen onLoginSuccess={() => setIsAuthenticated(true)} />;
   }
 
-  const totalUnread = CHATS.reduce((sum, c) => sum + c.unread, 0);
 
   const renderScreen = () => {
     if (nav.screen === "matchDetail" && nav.selectedMatch) {
@@ -61,13 +67,20 @@ export default function App() {
     }
 
     if (nav.screen === "chat" && nav.selectedChat) {
-      return (
-        <ChatScreen
-          chat={nav.selectedChat}
-          onBack={() => setNav((p) => ({ ...p, screen: "main", tab: "chat" }))}
-        />
-      );
-    }
+  return (
+    <ChatScreen
+      chat={nav.selectedChat}
+      onBack={() => {
+        setChatListVersion((version) => version + 1);
+        setNav((prev) => ({
+          ...prev,
+          screen: "main",
+          tab: "chat",
+        }));
+      }}
+    />
+  );
+}
 
     switch (nav.tab) {
       case "explore":
@@ -79,10 +92,16 @@ export default function App() {
       case "chat":
         return (
           <ChatListScreen
-            onChatPress={(chat) =>
-              setNav({ tab: "chat", screen: "chat", selectedChat: chat })
-            }
-          />
+      refreshKey={chatListVersion}
+      onUnreadChange={setTotalUnread}
+      onChatPress={(chat) => {
+        setNav({
+          tab: "chat",
+          screen: "chat",
+          selectedChat: chat,
+        });
+      }}
+    />
         );
       case "profile":
         return <ProfileScreen onLogout={handleLogout} />;

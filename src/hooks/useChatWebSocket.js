@@ -2,17 +2,17 @@ import { useState, useEffect, useRef } from "react";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
-export function useChatWebSocket(matchId) {
+export function useChatWebSocket(chatId) {
   const [messages, setMessages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef(null);
 
   // 1. Učitavanje istorije poruka preko REST API-ja
   useEffect(() => {
-    if (!matchId) return;
+    if (!chatId) return;
 
     const token = localStorage.getItem("matchup_token");
-    fetch(`${API_BASE}/api/chats/${matchId}/messages`, {
+    fetch(`${API_BASE}/api/chats/${chatId}/messages`, {
       headers: { 
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json"
@@ -24,11 +24,11 @@ export function useChatWebSocket(matchId) {
       })
       .then((data) => setMessages(Array.isArray(data) ? data : []))
       .catch((err) => console.error("Greška pri učitavanju poruka:", err));
-  }, [matchId]);
+  }, [chatId]);
 
   // 2. Konekcija na WebSocket za real-time poruke
   useEffect(() => {
-    if (!matchId) return;
+    if (!chatId) return;
 
     const token = localStorage.getItem("matchup_token");
     if (!token || token === "null") {
@@ -38,7 +38,9 @@ export function useChatWebSocket(matchId) {
 
     const wsProtocol = API_BASE.startsWith("https") ? "wss" : "ws";
     const cleanHost = API_BASE.replace(/^https?:\/\//, "");
-    const wsUrl = `${wsProtocol}://${cleanHost}/api/chats/${matchId}?token=${encodeURIComponent(token)}`;
+    
+    // Putanja prebačena na /api/chats/ws/${chatId}
+    const wsUrl = `${wsProtocol}://${cleanHost}/api/chats/ws/${chatId}?token=${encodeURIComponent(token)}`;
 
     const ws = new WebSocket(wsUrl);
     socketRef.current = ws;
@@ -48,7 +50,14 @@ export function useChatWebSocket(matchId) {
     ws.onmessage = (event) => {
       try {
         const newMessage = JSON.parse(event.data);
-        setMessages((prev) => [...prev, newMessage]);
+        
+        // Prevencija dupliranja poruka u UI stanju
+        setMessages((prev) => {
+          if (prev.some((msg) => msg.id === newMessage.id)) {
+            return prev;
+          }
+          return [...prev, newMessage];
+        });
       } catch (e) {
         console.error("Greška pri parsiranju WS poruke:", e);
       }
@@ -62,11 +71,13 @@ export function useChatWebSocket(matchId) {
         ws.close();
       }
     };
-  }, [matchId]);
+  }, [chatId]);
 
   const sendMessage = (text) => {
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
       socketRef.current.send(text);
+    } else {
+      console.warn("WebSocket nije otvoren. Poruka nije poslata.");
     }
   };
 

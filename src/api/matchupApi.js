@@ -2,8 +2,7 @@
 
 
 
-const BASE =
-  import.meta.env.VITE_API_URL || "http://localhost:8080";
+const BASE = import.meta.env.VITE_API_URL;
 
 export const request = async (method, endpoint, body = null) => {
   const token = localStorage.getItem("matchup_token");
@@ -73,13 +72,19 @@ export const getMatchPlayers = (matchId) => request("GET", `/matches/${matchId}/
 
 // ── CHAT ─────────────────────────────────────────────────────────────────────
 
+// Izmena u API funkcijama (šalje se chatId):
 export const listChats = () => request("GET", "/chats");
+
 export const getChatMessages = (chatId, page = 1, limit = 50) =>
   request("GET", `/chats/${chatId}/messages?page=${page}&limit=${limit}`);
+
 export const sendMessage = (chatId, text) =>
   request("POST", `/chats/${chatId}/messages`, { text });
+
 export const markChatRead = (chatId) =>
   request("POST", `/chats/${chatId}/read`);
+
+// Za WebSocket spajanje koristi novu /ws/ putanju:
 
 // ── NOTIFICATIONS ────────────────────────────────────────────────────────────
 

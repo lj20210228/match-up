@@ -1,37 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { listChats } from "../api/matchupApi";
 
-export default function ChatListScreen({ onChatPress }) {
+export default function ChatListScreen({
+  onChatPress,
+  onUnreadChange,
+  refreshKey,
+}) {
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const loadChats = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const data = await listChats();
+      const loadedChats = Array.isArray(data) ? data : [];
+
+      setChats(loadedChats);
+
+      const unreadTotal = loadedChats.reduce(
+        (sum, chat) => sum + Number(chat.unread || 0),
+        0
+      );
+
+      onUnreadChange(unreadTotal);
+    } catch (err) {
+      console.error("Greška pri učitavanju četova:", err);
+      setError("Četovi trenutno nisu dostupni.");
+      onUnreadChange(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [onUnreadChange]);
+
   useEffect(() => {
-    let mounted = true;
-
-    listChats()
-      .then((data) => {
-        if (!mounted) return;
-
-        setChats(Array.isArray(data) ? data : []);
-      })
-      .catch((err) => {
-        console.error("Greška pri učitavanju četova:", err);
-
-        if (mounted) {
-          setError("Četovi trenutno nisu dostupni.");
-        }
-      })
-      .finally(() => {
-        if (mounted) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    loadChats();
+  }, [loadChats, refreshKey]);
 
   const totalUnread = chats.reduce(
     (sum, chat) => sum + Number(chat.unread || 0),
@@ -92,6 +98,15 @@ export default function ChatListScreen({ onChatPress }) {
 }
 
 function ChatRow({ chat, onPress }) {
+  const unread = Number(chat.unread || 0);
+
+  const unreadLabel =
+    unread === 0
+      ? "Nema nepročitanih poruka"
+      : unread === 1
+        ? "1 nepročitana poruka"
+        : `${unread} nepročitanih poruka`;
+
   return (
     <button
       type="button"
@@ -101,46 +116,28 @@ function ChatRow({ chat, onPress }) {
       <div className="w-[50px] h-[50px] rounded-[16px] bg-[#1C1C1E] border border-white/10 flex items-center justify-center text-2xl shrink-0 relative">
         {chat.sportEmoji || "⚽"}
 
-        {Number(chat.unread) > 0 && (
+        {unread > 0 && (
           <div className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full bg-[#D4FF00] border-2 border-[#0F0F11] flex items-center justify-center text-[9px] font-extrabold text-[#0F0F11] px-1">
-            {chat.unread}
+            {unread}
           </div>
         )}
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-baseline justify-between mb-1 gap-2">
-          <div className="text-sm font-bold text-[#F5F5F3] tracking-tight truncate">
-            {chat.name || "Grupni čet"}
-          </div>
-
-          <div className="text-[11px] text-[#F5F5F3]/30 shrink-0">
-            {chat.lastMessageTime || ""}
-          </div>
+        <div className="text-sm font-bold text-[#F5F5F3] tracking-tight truncate">
+          {chat.name || "Grupni čet"}
         </div>
 
-        <div className="text-xs text-[#F5F5F3]/40 truncate mb-1">
-          {chat.lastMessage || "Još nema poruka"}
-        </div>
-
-        <div className="text-[11px] text-[#F5F5F3]/25 truncate">
-          {chat.participants || 0} igrača · {chat.venue || "Teren nije naveden"}
+        <div
+          className={`text-xs truncate mt-1 ${
+            unread > 0
+              ? "text-[#D4FF00] font-semibold"
+              : "text-[#F5F5F3]/40"
+          }`}
+        >
+          {unreadLabel}
         </div>
       </div>
-
-      <svg
-        className="w-3.5 h-3.5 text-[#F5F5F3]/20 shrink-0"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M9 18l6-6-6-6"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
     </button>
   );
 }

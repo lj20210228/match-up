@@ -6,6 +6,7 @@ export default function ChatScreen({ chat, currentUserId, onBack }) {
   const [input, setInput] = useState("");
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+  console.log(chat);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
