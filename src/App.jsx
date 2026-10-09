@@ -84,7 +84,7 @@ const switchTab = (tab) => {
 
     switch (nav.tab) {
       case "explore":
-        return <FeedScreen onMatchPress={(m) => goToMatch(m, false)} />;
+        return <FeedScreen onMatchPress={(m) => goToMatch(m, false)}        onLogout={handleLogout}/>;
       case "matches":
         return <MatchesScreen onMatchPress={(m) => goToMatch(m, true)} />;
       case "map":
@@ -105,7 +105,7 @@ const switchTab = (tab) => {
         );
   
       default:
-        return <FeedScreen onMatchPress={(m) => goToMatch(m, false)} />;
+        return <FeedScreen onMatchPress={(m) => goToMatch(m, false)}        onLogout={handleLogout}/>;
     }
   };
 

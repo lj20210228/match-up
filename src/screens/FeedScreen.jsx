@@ -19,7 +19,7 @@ const sportEmojis = {
   All: "◉",
 };
 
-export default function FeedScreen({ onMatchPress }) {
+export default function FeedScreen({ onMatchPress ,onLogout}) {
   const [activeSport, setActiveSport] = useState("All");
   const [maxDistance, setMaxDistance] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,7 +81,7 @@ export default function FeedScreen({ onMatchPress }) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[12px] font-medium text-[#F5F5F3]/40 tracking-wider uppercase">
-                Dobro veče
+                Dobrodošli
               </span>
 
               <span className="bg-white/[0.07] border border-white/10 rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-[#F5F5F3]/65 flex items-center gap-1">
@@ -95,15 +95,28 @@ export default function FeedScreen({ onMatchPress }) {
             </h1>
           </div>
 
-          <div className="flex flex-col items-center gap-1.5">
-            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#2a2a2c] to-[#1a1a1c] border border-white/12 flex items-center justify-center text-sm font-bold text-[#F5F5F3]">
-              MK
-            </div>
-
-            <div className="bg-[#D4FF00]/12 border border-[#D4FF00]/25 text-[#D4FF00] rounded-full text-[11px] font-bold px-2 py-0.5 whitespace-nowrap">
-              ★ 4.9
-            </div>
-          </div>
+                    <button
+              type="button"
+              onClick={onLogout}
+              aria-label="Odjavi se"
+              title="Odjavi se"
+              className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-[#F5F5F3]/70 transition-colors hover:border-red-400/30 hover:bg-red-400/10 hover:text-red-300"
+            >
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M10 17l5-5-5-5M15 12H3m9-8h5a3 3 0 013 3v10a3 3 0 01-3 3h-5"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
         </div>
 
         <div className="bg-[#1C1C1E] border border-white/10 rounded-xl flex items-center gap-2.5 px-4 py-3 mb-3.5">
