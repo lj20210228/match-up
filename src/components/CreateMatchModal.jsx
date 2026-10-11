@@ -18,6 +18,36 @@ const SPORTS = [
   { name: "Running", emoji: "🏃" },
   { name: "Other", label: "Drugo", emoji: "🏅" },
 ];
+const LEVELS = [
+  {
+    value: "Beginner",
+    label: "Početnički",
+    description: "Tek počinjem",
+    emoji: "🌱",
+    levelSrb: "Početnički",
+  },
+  {
+    value: "Intermediate",
+    label: "Rekreativni",
+    description: "Igram povremeno",
+    emoji: "🏃",
+    levelSrb: "Rekreativno",
+  },
+  {
+    value: "Advanced",
+    label: "Napredni",
+    description: "Imam dosta iskustva",
+    emoji: "🔥",
+    levelSrb: "Napredni",
+  },
+  {
+    value: "Professional",
+    label: "Profesionalni",
+    description: "Takmičarski nivo",
+    emoji: "🏆",
+    levelSrb: "Profesionalni",
+  },
+];
 const getLocalDateInputValue = (date = new Date()) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
