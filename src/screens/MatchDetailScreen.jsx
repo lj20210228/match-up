@@ -77,14 +77,6 @@ export default function MatchDetailScreen({ match: initialMatch, isMyMatch, onBa
             </svg>
           </button>
 
-          {joined && (
-            <button
-              onClick={() => onChat(match.id)}
-              className="rounded-xl bg-[#0F0F11]/70 border border-white/10 backdrop-blur-md flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#F5F5F3] cursor-pointer hover:bg-white/10 transition-colors"
-            >
-              Chat
-            </button>
-          )}
         </div>
       </div>
 

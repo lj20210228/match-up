@@ -192,9 +192,7 @@ export default function ChatScreen({ chat, currentUserId, onBack }) {
           </button>
         </div>
 
-        <p className="mb-0 mt-2 text-center text-[10px] text-[#F5F5F3]/25">
-          Enter za slanje
-        </p>
+        
       </footer>
     </div>
   );
