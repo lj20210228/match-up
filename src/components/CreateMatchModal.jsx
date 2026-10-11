@@ -16,8 +16,8 @@ const SPORTS = [
   { name: "Tennis", emoji: "🎾" },
   { name: "Padel", emoji: "🏸" },
   { name: "Running", emoji: "🏃" },
+  { name: "Other", label: "Drugo", emoji: "🏅" },
 ];
-
 const getLocalDateInputValue = (date = new Date()) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -227,11 +227,56 @@ setPinSelected(true);
                       : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
                   }`}
                 >
-                  {item.emoji} {item.name}
+                  {item.emoji} {item.label|| item.name}
                 </button>
               ))}
             </div>
           </section>
+          <section>
+  <label className="mb-2 block text-[11px] font-semibold uppercase text-white/40">
+    Nivo igre
+  </label>
+
+  <div className="grid grid-cols-2 gap-2">
+    {LEVELS.map((item) => {
+      const isSelected = level === item.value;
+
+      return (
+        <button
+          key={item.value}
+          type="button"
+          aria-pressed={isSelected}
+          onClick={() => {
+            setLevel(item.value);
+            setLevelSrb(item.levelSrb);
+          }}
+          className={`flex items-center gap-3 rounded-2xl border p-3 text-left transition ${
+            isSelected
+              ? "border-[#D4FF00]/60 bg-[#D4FF00]/10"
+              : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+          }`}
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.06] text-lg">
+            {item.emoji}
+          </span>
+
+          <span className="min-w-0">
+            <span
+              className={`block text-xs font-bold ${
+                isSelected ? "text-[#D4FF00]" : "text-white/80"
+              }`}
+            >
+              {item.label}
+            </span>
+            <span className="mt-1 block text-[10px] leading-snug text-white/40">
+              {item.description}
+            </span>
+          </span>
+        </button>
+      );
+    })}
+  </div>
+</section>
 
           <section className="space-y-3 rounded-2xl border border-white/8 bg-white/[0.025] p-4">
             <p className="text-xs font-bold text-white/80">Termin</p>
