@@ -89,61 +89,62 @@ export default function ChatScreen({ chat, currentUserId, onBack }) {
         ) : (
           <div className="space-y-3">
             {messages.map((msg, idx) => {
-              const isUser = msg.senderId === currentUserId;
-              const prev = messages[idx - 1];
-              const sameSender = prev && prev.senderId === msg.senderId;
+  const isUser =
+    currentUserId != null &&
+    String(msg.senderId) === String(currentUserId);
 
-              if (isUser) {
-                return (
-                  <div
-                    key={msg.id || idx}
-                    className="flex justify-end"
-                  >
-                    <div className="max-w-[82%]">
-                      <div className="rounded-2xl rounded-tr-md bg-[#D4FF00] px-4 py-2.5 text-[13px] font-medium leading-relaxed text-[#111113] shadow-[0_4px_16px_rgba(212,255,0,0.08)]">
-                        {msg.text}
-                      </div>
-                      {msg.time && (
-                        <div className="mt-1.5 pr-1 text-right text-[10px] text-[#F5F5F3]/30">
-                          {msg.time}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              }
+  const prev = messages[idx - 1];
+  const sameSender = prev && prev.senderId === msg.senderId;
 
-              return (
-                <div
-                  key={msg.id || idx}
-                  className="flex items-end gap-2"
-                >
-                  <div className="w-8 shrink-0">
-                    {!sameSender && (
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-[#242426] text-[9px] font-bold text-[#F5F5F3]/80">
-                        {msg.senderInitials || "?"}
-                      </div>
-                    )}
-                  </div>
+  if (isUser) {
+    return (
+      <div key={msg.id || idx} className="flex justify-end">
+        <div className="max-w-[82%]">
+          <div className="rounded-2xl rounded-tr-md bg-[#D4FF00] px-4 py-2.5 text-[13px] font-medium leading-relaxed text-[#111113]">
+            {msg.text}
+          </div>
+          {msg.time && (
+            <div className="mt-1.5 pr-1 text-right text-[10px] text-[#F5F5F3]/30">
+              {msg.time}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
-                  <div className="max-w-[82%]">
-                    {!sameSender && msg.senderName && (
-                      <div className="mb-1.5 pl-1 text-[10px] font-semibold text-[#F5F5F3]/45">
-                        {msg.senderName}
-                      </div>
-                    )}
-                    <div className="rounded-2xl rounded-tl-md border border-white/[0.08] bg-[#1C1C1E] px-4 py-2.5 text-[13px] leading-relaxed text-[#F5F5F3]/90">
-                      {msg.text}
-                    </div>
-                    {msg.time && (
-                      <div className="mt-1.5 pl-1 text-[10px] text-[#F5F5F3]/30">
-                        {msg.time}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+  return (
+    <div key={msg.id || idx} className="flex items-start gap-2">
+      <div
+        className={`w-8 shrink-0 ${
+          !sameSender && msg.senderName ? "pt-[18px]" : ""
+        }`}
+      >
+        {!sameSender && (
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-[#242426] text-[9px] font-bold text-[#F5F5F3]/80">
+            {msg.senderInitials || "?"}
+          </div>
+        )}
+      </div>
+
+      <div className="max-w-[82%]">
+        {!sameSender && msg.senderName && (
+          <div className="mb-1.5 pl-1 text-[10px] font-semibold text-[#F5F5F3]/45">
+            {msg.senderName}
+          </div>
+        )}
+        <div className="rounded-2xl rounded-tl-md border border-white/[0.08] bg-[#1C1C1E] px-4 py-2.5 text-[13px] leading-relaxed text-[#F5F5F3]/90">
+          {msg.text}
+        </div>
+        {msg.time && (
+          <div className="mt-1.5 pl-1 text-[10px] text-[#F5F5F3]/30">
+            {msg.time}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+})}
           </div>
         )}
 
